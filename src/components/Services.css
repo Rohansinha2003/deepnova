@@ -10,12 +10,22 @@
 }
 
 .service-card {
+  display: block;
   padding: 2.5rem;
   border-radius: 1rem;
   transition: all var(--transition-normal);
   position: relative;
   overflow: hidden;
   z-index: 1;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Press animation on click */
+.service-card:active {
+  transform: translateY(-2px) scale(0.98);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
 }
 
 .service-card::before {
@@ -48,15 +58,14 @@
   width: 64px;
   height: 64px;
   border-radius: 1rem;
-  background: rgba(157, 0, 255, 0.1);
-  color: var(--neon-purple);
+  background: rgba(255, 255, 255, 0.05); /* Softer base */
   margin-bottom: 1.5rem;
   transition: all var(--transition-normal);
 }
 
 .service-card:hover .service-icon-wrapper {
   background: var(--accent-gradient);
-  color: white;
+  color: white !important;
   transform: scale(1.1) rotate(-5deg);
   box-shadow: var(--accent-glow);
 }
@@ -64,12 +73,30 @@
 .service-title {
   font-size: 1.25rem;
   margin-bottom: 1rem;
+  color: var(--text-primary);
 }
 
 .service-desc {
   color: var(--text-secondary);
   font-size: 0.95rem;
   line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.card-click-indicator {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 2.5rem;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all var(--transition-normal);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.service-card:hover .card-click-indicator {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 @media (max-width: 992px) {

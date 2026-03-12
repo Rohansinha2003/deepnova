@@ -11,6 +11,7 @@ import Features from './components/Features';
 import ContactCTA from './components/ContactCTA';
 import Footer from './components/Footer';
 import Admin from './Admin';
+import ServiceDetail from './components/ServiceDetail';
 
 function LandingPage() {
   useEffect(() => {
@@ -53,6 +54,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/services/:id" element={<ServiceDetail />} />
       </Routes>
     </BrowserRouter>
   );

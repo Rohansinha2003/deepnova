@@ -1,0 +1,152 @@
+.service-detail-page {
+  padding-top: var(--header-height);
+  min-height: 100vh;
+}
+
+.service-hero {
+  padding: 6rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 3rem;
+  transition: color var(--transition-fast);
+}
+
+.back-link:hover {
+  color: white;
+}
+
+.service-hero-content {
+  max-width: 800px;
+}
+
+.sd-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 90px;
+  border-radius: 1.5rem;
+  background: var(--surface-light);
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: pulse 4s infinite alternate;
+}
+
+.sd-title {
+  font-size: 3.5rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+  color: white;
+}
+
+.sd-subtitle {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.sd-details {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 4rem;
+  padding: 4rem 2rem 8rem;
+}
+
+.sd-text-block {
+  padding: 3rem;
+  border-radius: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.sd-text-block h2, 
+.sd-features-block h2 {
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+.sd-text-block p {
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+  line-height: 1.8;
+}
+
+.sd-features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.sd-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 1rem;
+}
+
+.sd-feature-item span {
+  font-size: 1.05rem;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
+.feature-check {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.sd-cta-panel {
+  padding: 3rem 2rem;
+  border-radius: 1.5rem;
+  height: fit-content;
+  position: sticky;
+  top: calc(var(--header-height) + 2rem);
+  text-align: center;
+}
+
+.sd-cta-panel h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.sd-cta-panel p {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+@media (max-width: 992px) {
+  .sd-details {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  .sd-cta-panel {
+    position: relative;
+    top: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .sd-title {
+    font-size: 2.5rem;
+  }
+  .sd-features-grid {
+    grid-template-columns: 1fr;
+  }
+  .sd-text-block, .sd-cta-panel {
+    padding: 2rem;
+  }
+}
