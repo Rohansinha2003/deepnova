@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "concurrently \"vite preview\" \"node server.js\""
+    "start": "node server.js"
   },
   "dependencies": {
     "concurrently": "^9.2.1",
