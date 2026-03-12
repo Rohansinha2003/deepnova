@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Database, Search, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { supabase } from './lib/supabase';
 import './Admin.css';
 
 const Admin = () => {
@@ -11,12 +12,18 @@ const Admin = () => {
   useEffect(() => {
     const fetchContacts = async () => {
       try {
-        const response = await fetch('/api/contacts');
-        if (!response.ok) {
-          throw new Error('Failed to fetch contact submissions');
+        if (!import.meta.env.VITE_SUPABASE_URL) {
+           throw new Error("Supabase is not configured. Admin panel unavailable.");
         }
-        const data = await response.json();
-        setContacts(data);
+
+        const { data, error: fetchError } = await supabase
+          .from('contacts')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (fetchError) throw fetchError;
+        
+        setContacts(data || []);
       } catch (err) {
         setError(err.message);
       } finally {

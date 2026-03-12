@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { supabase } from '../lib/supabase';
 import './ContactCTA.css';
 
 const ContactCTA = () => {
@@ -13,22 +14,27 @@ const ContactCTA = () => {
     setError('');
     
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      if (!import.meta.env.VITE_SUPABASE_URL) {
+         throw new Error("Supabase is not configured yet. Please enter your env variables.");
+      }
 
-      if (!response.ok) {
-        throw new Error('Failed to submit form');
+      const { error: submitError } = await supabase
+        .from('contacts')
+        .insert([{
+          name: formData.name,
+          email: formData.email,
+          company: formData.company,
+          message: formData.message
+        }]);
+
+      if (submitError) {
+        throw submitError;
       }
 
       setSubmitted(true);
       setFormData({ name: '', email: '', company: '', message: '' });
     } catch (err) {
-      setError('Something went wrong. Please try again later.');
+      setError(err.message || 'Something went wrong. Please try again later.');
       console.error(err);
     } finally {
       setLoading(false);
