@@ -10,28 +10,33 @@ const Admin = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchContacts = async () => {
       try {
         if (!import.meta.env.VITE_SUPABASE_URL) {
-           throw new Error("Supabase is not configured. Admin panel unavailable.");
+           throw new Error("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file.");
         }
 
         const { data, error: fetchError } = await supabase
           .from('contacts')
           .select('*')
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .abortSignal(controller.signal);
 
         if (fetchError) throw fetchError;
-        
+
         setContacts(data || []);
       } catch (err) {
-        setError(err.message);
+        // Ignore abort errors — component unmounted intentionally
+        if (err.name !== 'AbortError') setError(err.message);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
 
     fetchContacts();
+    return () => controller.abort();
   }, []);
 
   return (

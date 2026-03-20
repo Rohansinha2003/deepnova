@@ -1,33 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, Cpu } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import './Navbar.css';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const close = () => setMobileMenuOpen(false);
+  const isActive = (path) => location.pathname === path;
+
   return (
     <nav className={`navbar ${isScrolled ? 'scrolled glass' : ''}`}>
       <div className="container nav-content">
-        <div className="logo">
+        <Link to="/" className="logo" onClick={close}>
           <Cpu className="logo-icon" size={28} />
           <span className="logo-text">DeepNova <span className="gradient-text">AI</span></span>
-        </div>
-        
+        </Link>
+
         <ul className={`nav-links ${mobileMenuOpen ? 'active glass' : ''}`}>
-          <li><a href="#home" onClick={() => setMobileMenuOpen(false)}>Home</a></li>
-          <li><a href="#services" onClick={() => setMobileMenuOpen(false)}>Services</a></li>
-          <li><a href="#solutions" onClick={() => setMobileMenuOpen(false)}>Solutions</a></li>
-          <li><a href="#projects" onClick={() => setMobileMenuOpen(false)}>Projects</a></li>
-          <li><a href="#contact" className="btn btn-primary btn-nav" onClick={() => setMobileMenuOpen(false)}>Contact Us</a></li>
+          <li>
+            <Link to="/" className={isActive('/') ? 'nav-active' : ''} onClick={close}>Home</Link>
+          </li>
+          <li>
+            <Link to="/who-we-are" className={isActive('/who-we-are') ? 'nav-active' : ''} onClick={close}>Who We Are</Link>
+          </li>
+          <li>
+            <a href="/who-we-are#contact" className="btn btn-primary btn-nav" onClick={close}>Contact Us</a>
+          </li>
         </ul>
 
         <div className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>

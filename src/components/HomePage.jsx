@@ -1,0 +1,233 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  Send, Bot, User, Sparkles, Zap, Brain,
+  FileText, Languages, Code2, Lightbulb, BarChart2,
+  ArrowRight, Globe, Cpu,
+} from 'lucide-react';
+import Navbar from './Navbar';
+import Footer from './Footer';
+import './HomePage.css';
+
+/* ── Search Modes ─────────────────────────────────────────── */
+const SEARCH_MODES = [
+  { id: 'ask',        label: 'Ask Anything',  icon: <Sparkles size={15} />,   placeholder: "What's on your mind? Ask me anything…",          color: '#a855f7' },
+  { id: 'summarize',  label: 'Summarise',     icon: <FileText size={15} />,   placeholder: 'Paste text or a topic to summarise…',            color: '#3b82f6' },
+  { id: 'translate',  label: 'Translate',     icon: <Languages size={15} />,  placeholder: 'Enter text and specify the target language…',    color: '#06b6d4' },
+  { id: 'code',       label: 'Code',          icon: <Code2 size={15} />,      placeholder: 'Describe what you want to build or fix…',        color: '#22c55e' },
+  { id: 'brainstorm', label: 'Brainstorm',    icon: <Lightbulb size={15} />,  placeholder: "Give me a topic and I'll generate ideas…",       color: '#f59e0b' },
+  { id: 'analyze',    label: 'Analyse Data',  icon: <BarChart2 size={15} />,  placeholder: 'Paste your data or describe what to analyse…',   color: '#f43f5e' },
+];
+
+const MODE_SUGGESTIONS = {
+  ask:        ['Explain transformer architecture', 'What is RAG?', 'Deep learning vs ML?'],
+  summarize:  ['Summarise the GDPR in 5 points', 'TL;DR of a research paper', 'Key points from this article'],
+  translate:  ['Translate to French', 'Translate to Japanese', 'Translate to Hindi'],
+  code:       ['Build a REST API in Express', 'Python quicksort', 'React custom hook example'],
+  brainstorm: ['SaaS product ideas for 2025', 'Blog titles about AI', 'Creative startup names'],
+  analyze:    ['Trend analysis from this CSV', 'What does this data mean?', 'Find anomalies in these numbers'],
+};
+
+
+export default function HomePage() {
+  const [activeMode, setActiveMode]   = useState(SEARCH_MODES[0]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [messages, setMessages]       = useState([
+    { role: 'assistant', text: "Hi! I'm DeepNova's AI. Choose a mode and ask me anything — I'm ready." },
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const bottomRef  = useRef(null);
+  const msgsRef    = useRef(null);
+  const inputRef   = useRef(null);
+  const mountedRef = useRef(true);
+
+  // Track mounted state to prevent setState after unmount
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(e => e.isIntersecting && e.target.classList.add('is-visible')),
+      { threshold: 0.1 }
+    );
+    document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (msgsRef.current) msgsRef.current.scrollTop = msgsRef.current.scrollHeight;
+  }, [messages]);
+
+  const sendMessage = async (text) => {
+    const userText = (text ?? searchQuery).trim();
+    if (!userText || isLoading) return;
+    setMessages(prev => [...prev, { role: 'user', text: `[${activeMode.label}] ${userText}` }]);
+    setSearchQuery('');
+    setIsLoading(true);
+    await new Promise(r => setTimeout(r, 1500));
+    if (!mountedRef.current) return; // Component unmounted — bail out
+    setMessages(prev => [...prev, {
+      role: 'assistant',
+      text: `(${activeMode.label} mode) Here's a simulated response to: "${userText}". Connect DeepNova's LLM backend for real completions.`,
+    }]);
+    setIsLoading(false);
+  };
+
+  const handleKey = e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  };
+
+  return (
+    <>
+      <Navbar />
+      <main className="hp-page">
+
+        {/* ════ HERO ════════════════════════════════════════ */}
+        <section className="hp-hero">
+          {/* animated grid background */}
+          <div className="hp-grid-bg" />
+          {/* glow orbs */}
+          <div className="hp-orb hp-orb-1" style={{ background: activeMode.color }} />
+          <div className="hp-orb hp-orb-2" />
+
+          <div className="container hp-hero-inner">
+            {/* Left: copy + search */}
+            <div className="hp-hero-left animate-on-scroll">
+              <div className="hp-badge">
+                <Sparkles size={13} /> Powered by DeepNova AI
+              </div>
+              <h1 className="hp-headline">
+                What's on <span className="gradient-text">your mind?</span>
+              </h1>
+              <p className="hp-subhead">
+                The AI that writes, reasons, summarises, codes, and translates —
+                all in one place. Pick a mode and start creating.
+              </p>
+
+              {/* Mode tabs */}
+              <div className="hp-mode-tabs">
+                {SEARCH_MODES.map(mode => (
+                  <button
+                    key={mode.id}
+                    className={`hp-mode-tab ${activeMode.id === mode.id ? 'active' : ''}`}
+                    style={activeMode.id === mode.id
+                      ? { background: mode.color + '22', borderColor: mode.color + '88', color: mode.color }
+                      : {}}
+                    onClick={() => { setActiveMode(mode); inputRef.current?.focus(); }}
+                  >
+                    {mode.icon} {mode.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Search bar */}
+              <div className="hp-search-bar glass" style={{ '--mc': activeMode.color }}>
+                <div className="hp-search-pill" style={{ background: activeMode.color + '22', borderColor: activeMode.color + '66', color: activeMode.color }}>
+                  {activeMode.icon} {activeMode.label}
+                </div>
+                <input
+                  ref={inputRef}
+                  className="hp-search-input"
+                  type="text"
+                  placeholder={activeMode.placeholder}
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  onKeyDown={handleKey}
+                  disabled={isLoading}
+                />
+                <button
+                  className="hp-search-send"
+                  style={{ background: activeMode.color }}
+                  onClick={() => sendMessage()}
+                  disabled={isLoading || !searchQuery.trim()}
+                >
+                  <Send size={17} />
+                </button>
+              </div>
+
+              {/* Suggestions */}
+              <div className="hp-suggestions">
+                <span className="hp-suggest-label">Try:</span>
+                {(MODE_SUGGESTIONS[activeMode.id] || []).map((s, i) => (
+                  <button key={i} className="hp-chip" onClick={() => sendMessage(s)} disabled={isLoading}
+                    style={{ '--mc': activeMode.color }}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+
+              {/* Stat row */}
+              <div className="hp-stats">
+                <div className="hp-stat glass"><Zap size={16} style={{ color: '#f59e0b' }} /><span>Low latency</span></div>
+                <div className="hp-stat glass"><Brain size={16} style={{ color: '#a855f7' }} /><span>128k context</span></div>
+                <div className="hp-stat glass"><Globe size={16} style={{ color: '#06b6d4' }} /><span>100+ languages</span></div>
+              </div>
+            </div>
+
+            {/* Right: live chat panel */}
+            <div className="hp-chat-panel glass animate-on-scroll">
+              <div className="hp-chat-header">
+                <Bot size={18} style={{ color: activeMode.color }} />
+                <span>Live Demo — <em style={{ color: activeMode.color }}>{activeMode.label}</em></span>
+                <span className="hp-live-dot">● Live</span>
+              </div>
+              <div className="hp-chat-msgs" ref={msgsRef}>
+                {messages.map((m, i) => (
+                  <div key={i} className={`hp-msg ${m.role}`}>
+                    <div className="hp-avatar" style={m.role === 'assistant'
+                      ? { color: activeMode.color, borderColor: activeMode.color + '55', background: activeMode.color + '18' }
+                      : {}}>
+                      {m.role === 'assistant' ? <Bot size={14} /> : <User size={14} />}
+                    </div>
+                    <div className="hp-bubble">{m.text}</div>
+                  </div>
+                ))}
+                {isLoading && (
+                  <div className="hp-msg assistant">
+                    <div className="hp-avatar" style={{ color: activeMode.color, borderColor: activeMode.color + '55', background: activeMode.color + '18' }}>
+                      <Bot size={14} />
+                    </div>
+                    <div className="hp-bubble hp-typing"><span /><span /><span /></div>
+                  </div>
+                )}
+                <div ref={bottomRef} />
+              </div>
+              <div className="hp-chat-input-row">
+                <textarea
+                  rows={1}
+                  className="hp-chat-input"
+                  placeholder="Type a message…"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  onKeyDown={handleKey}
+                  disabled={isLoading}
+                />
+                <button className="hp-chat-send" style={{ background: activeMode.color }}
+                  onClick={() => sendMessage()} disabled={isLoading || !searchQuery.trim()}>
+                  <Send size={15} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        {/* ════ CTA BANNER ═════════════════════════════════ */}
+        <section className="hp-cta-banner container animate-on-scroll">
+          <div className="hp-cta-inner glass">
+            <div className="hp-cta-glow" />
+            <h2>Ready to explore DeepNova?</h2>
+            <p>Learn about our team, our mission, and the technology we're building.</p>
+            <Link to="/who-we-are" className="btn btn-primary hp-cta-btn">
+              Who We Are <ArrowRight size={18} />
+            </Link>
+          </div>
+        </section>
+
+      </main>
+      <Footer />
+    </>
+  );
+}
