@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { callAI } from '../lib/ai';
 import {
   Send, Bot, User, Sparkles, Zap, Brain,
-  FileText, Languages, Code2, Lightbulb, BarChart2,
-  ArrowRight, Globe, Cpu,
+  MessageSquare, FileText, Languages, Code2, Cpu,
+  ArrowRight, Globe,
 } from 'lucide-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -11,21 +12,19 @@ import './HomePage.css';
 
 /* ── Search Modes ─────────────────────────────────────────── */
 const SEARCH_MODES = [
-  { id: 'ask',        label: 'Ask Anything',  icon: <Sparkles size={15} />,   placeholder: "What's on your mind? Ask me anything…",          color: '#a855f7' },
-  { id: 'summarize',  label: 'Summarise',     icon: <FileText size={15} />,   placeholder: 'Paste text or a topic to summarise…',            color: '#3b82f6' },
-  { id: 'translate',  label: 'Translate',     icon: <Languages size={15} />,  placeholder: 'Enter text and specify the target language…',    color: '#06b6d4' },
-  { id: 'code',       label: 'Code',          icon: <Code2 size={15} />,      placeholder: 'Describe what you want to build or fix…',        color: '#22c55e' },
-  { id: 'brainstorm', label: 'Brainstorm',    icon: <Lightbulb size={15} />,  placeholder: "Give me a topic and I'll generate ideas…",       color: '#f59e0b' },
-  { id: 'analyze',    label: 'Analyse Data',  icon: <BarChart2 size={15} />,  placeholder: 'Paste your data or describe what to analyse…',   color: '#f43f5e' },
+  { id: 'normal',    label: 'Normal',     icon: <MessageSquare size={15} />, placeholder: "Ask me anything…",                                  color: '#a855f7' },
+  { id: 'summarize', label: 'Summarize',  icon: <FileText size={15} />,     placeholder: 'Paste text or a topic to summarize…',              color: '#3b82f6' },
+  { id: 'translate', label: 'Translate',  icon: <Languages size={15} />,    placeholder: 'Enter text and specify the target language…',       color: '#06b6d4' },
+  { id: 'code',      label: 'Code',       icon: <Code2 size={15} />,        placeholder: 'Describe what you want to build or fix…',           color: '#22c55e' },
+  { id: 'reasoning', label: 'Reasoning',  icon: <Cpu size={15} />,          placeholder: 'Give me a problem and I\'ll think it through…',     color: '#f59e0b' },
 ];
 
 const MODE_SUGGESTIONS = {
-  ask:        ['Explain transformer architecture', 'What is RAG?', 'Deep learning vs ML?'],
-  summarize:  ['Summarise the GDPR in 5 points', 'TL;DR of a research paper', 'Key points from this article'],
-  translate:  ['Translate to French', 'Translate to Japanese', 'Translate to Hindi'],
-  code:       ['Build a REST API in Express', 'Python quicksort', 'React custom hook example'],
-  brainstorm: ['SaaS product ideas for 2025', 'Blog titles about AI', 'Creative startup names'],
-  analyze:    ['Trend analysis from this CSV', 'What does this data mean?', 'Find anomalies in these numbers'],
+  normal:    ['Explain transformer architecture', 'What is DeepNova AI?', 'How does RAG work?'],
+  summarize: ['Summarize the GDPR in 5 points', 'TL;DR of a research paper', 'Key points from this article'],
+  translate: ['Translate to French', 'Translate to Japanese', 'Translate to Hindi'],
+  code:      ['Build a REST API in Express', 'Python quicksort', 'React custom hook example'],
+  reasoning: ['Solve the trolley problem', 'Pros and cons of microservices', 'Best approach to scaling a startup?'],
 };
 
 
@@ -35,6 +34,8 @@ export default function HomePage() {
   const [messages, setMessages]       = useState([
     { role: 'assistant', text: "Hi! I'm DeepNova's AI. Choose a mode and ask me anything — I'm ready." },
   ]);
+  // Raw conversation history sent to the API (no display labels)
+  const [history, setHistory]   = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const bottomRef  = useRef(null);
   const msgsRef    = useRef(null);
@@ -63,16 +64,31 @@ export default function HomePage() {
   const sendMessage = async (text) => {
     const userText = (text ?? searchQuery).trim();
     if (!userText || isLoading) return;
-    setMessages(prev => [...prev, { role: 'user', text: `[${activeMode.label}] ${userText}` }]);
+
+    // Add user message to display
+    setMessages(prev => [...prev, { role: 'user', text: userText }]);
     setSearchQuery('');
     setIsLoading(true);
-    await new Promise(r => setTimeout(r, 1500));
-    if (!mountedRef.current) return; // Component unmounted — bail out
-    setMessages(prev => [...prev, {
-      role: 'assistant',
-      text: `(${activeMode.label} mode) Here's a simulated response to: "${userText}". Connect DeepNova's LLM backend for real completions.`,
-    }]);
-    setIsLoading(false);
+
+    // Build API history
+    const newHistory = [...history, { role: 'user', content: userText }];
+    setHistory(newHistory);
+
+    // AbortController so navigating away cancels the in-flight request
+    const controller = new AbortController();
+
+    try {
+      const reply = await callAI(activeMode.id, newHistory, controller.signal);
+      if (!mountedRef.current) return;
+      setMessages(prev => [...prev, { role: 'assistant', text: reply }]);
+      setHistory(prev => [...prev, { role: 'assistant', content: reply }]);
+    } catch (err) {
+      if (!mountedRef.current || err.name === 'AbortError') return;
+      const errMsg = err.message || 'Something went wrong. Please try again.';
+      setMessages(prev => [...prev, { role: 'assistant', text: `⚠️ ${errMsg}` }]);
+    } finally {
+      if (mountedRef.current) setIsLoading(false);
+    }
   };
 
   const handleKey = e => {
@@ -115,7 +131,7 @@ export default function HomePage() {
                     style={activeMode.id === mode.id
                       ? { background: mode.color + '22', borderColor: mode.color + '88', color: mode.color }
                       : {}}
-                    onClick={() => { setActiveMode(mode); inputRef.current?.focus(); }}
+                    onClick={() => { setActiveMode(mode); setHistory([]); inputRef.current?.focus(); }}
                   >
                     {mode.icon} {mode.label}
                   </button>
