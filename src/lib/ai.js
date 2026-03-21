@@ -83,13 +83,13 @@ export async function callAI(modeId, history, signal) {
     ...history,
   ];
 
-  const response = await fetch(`${API_URL}/chat/completions`, {
+  // Use the local Vite proxy (/api/ai) to avoid browser CORS issues.
+  // The proxy in vite.config.js forwards to VITE_AI_API_URL and
+  // injects the Authorization header server-side.
+  const response = await fetch('/api/ai/chat/completions', {
     method: 'POST',
     signal,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model,
       messages,
@@ -100,9 +100,13 @@ export async function callAI(modeId, history, signal) {
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
-    throw new Error(
-      err?.error?.message || `API error ${response.status}: ${response.statusText}`
-    );
+    const code = response.status;
+    const msg  = err?.error?.message || '';
+
+    if (code === 429) throw new Error('API quota exceeded — add billing credits at platform.openai.com/settings/billing.');
+    if (code === 401 || code === 403) throw new Error('Invalid or unauthorised API key. Check your VITE_AI_API_KEY in .env.');
+    if (code === 404) throw new Error(`Model not found. Check VITE_AI_MODEL_DEFAULT in .env. (${msg})`);
+    throw new Error(msg || `API error ${code}: ${response.statusText}`);
   }
 
   const data = await response.json();
