@@ -4,7 +4,7 @@ import { callAI } from '../lib/ai';
 import {
   Send, Bot, User, Sparkles, Zap, Brain,
   MessageSquare, FileText, Languages, Code2, Cpu,
-  ArrowRight, Globe,
+  ArrowRight, Globe, X,
 } from 'lucide-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -34,9 +34,10 @@ export default function HomePage() {
   const [messages, setMessages]       = useState([
     { role: 'assistant', text: "Hi! I'm DeepNova's AI. Choose a mode and ask me anything — I'm ready." },
   ]);
-  // Raw conversation history sent to the API (no display labels)
   const [history, setHistory]   = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [expanded, setExpanded]   = useState(false);
+  const [collapsing, setCollapsing] = useState(false);
   const bottomRef  = useRef(null);
   const msgsRef    = useRef(null);
   const inputRef   = useRef(null);
@@ -47,6 +48,27 @@ export default function HomePage() {
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
   }, []);
+
+  // Collapse on Escape key + lock body scroll when expanded
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') closePanel(); };
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = expanded ? 'hidden' : '';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [expanded]);
+
+  // Animate out then hide
+  const closePanel = () => {
+    if (!expanded || collapsing) return;
+    setCollapsing(true);
+    setTimeout(() => {
+      setExpanded(false);
+      setCollapsing(false);
+    }, 340);
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -69,6 +91,7 @@ export default function HomePage() {
     setMessages(prev => [...prev, { role: 'user', text: userText }]);
     setSearchQuery('');
     setIsLoading(true);
+    setExpanded(true); // expand panel on first send
 
     // Build API history
     const newHistory = [...history, { role: 'user', content: userText }];
@@ -183,11 +206,21 @@ export default function HomePage() {
             </div>
 
             {/* Right: live chat panel */}
-            <div className="hp-chat-panel glass animate-on-scroll">
+            {expanded && <div className="hp-chat-backdrop" onClick={closePanel} />}
+            <div className={`hp-chat-panel glass animate-on-scroll${expanded ? (collapsing ? ' hp-chat-expanded hp-chat-collapsing' : ' hp-chat-expanded') : ''}`}>
               <div className="hp-chat-header">
                 <Bot size={18} style={{ color: activeMode.color }} />
                 <span>Live Demo — <em style={{ color: activeMode.color }}>{activeMode.label}</em></span>
                 <span className="hp-live-dot">● Live</span>
+                {expanded && (
+                  <button
+                    className="hp-chat-close"
+                    onClick={(e) => { e.stopPropagation(); closePanel(); }}
+                    title="Close"
+                  >
+                    <X size={18} />
+                  </button>
+                )}
               </div>
               <div className="hp-chat-msgs" ref={msgsRef}>
                 {messages.map((m, i) => (
