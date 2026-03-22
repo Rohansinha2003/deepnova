@@ -434,6 +434,56 @@
   max-width: 80%;
 }
 
+/* Markdown styling inside bubbles */
+.hp-bubble p {
+  margin: 0 0 0.5rem;
+}
+.hp-bubble p:last-child {
+  margin-bottom: 0;
+}
+.hp-bubble ul, .hp-bubble ol {
+  margin: 0 0 0.5rem 1.2rem;
+  padding: 0;
+}
+.hp-bubble ul:last-child, .hp-bubble ol:last-child {
+  margin-bottom: 0;
+}
+.hp-bubble li {
+  margin-bottom: 0.2rem;
+}
+.hp-bubble code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background: rgba(0,0,0,0.3);
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.85em;
+  color: var(--text-primary);
+}
+.hp-bubble pre {
+  margin: 0.6rem 0;
+  background: rgba(0,0,0,0.4);
+  padding: 0.75rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.hp-bubble pre code {
+  background: transparent;
+  padding: 0;
+  color: #e5e7eb;
+}
+.hp-bubble strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.hp-bubble a {
+  color: var(--neon-blue, #00d2ff);
+  text-decoration: none;
+}
+.hp-bubble a:hover {
+  text-decoration: underline;
+}
+
 .hp-msg.user .hp-bubble {
   background: rgba(0,210,255,0.08);
   border-color: rgba(0,210,255,0.16);

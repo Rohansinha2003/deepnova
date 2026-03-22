@@ -6,6 +6,8 @@ import {
   MessageSquare, FileText, Languages, Code2, Cpu,
   ArrowRight, Globe, X,
 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import './HomePage.css';
@@ -230,7 +232,11 @@ export default function HomePage() {
                       : {}}>
                       {m.role === 'assistant' ? <Bot size={14} /> : <User size={14} />}
                     </div>
-                    <div className="hp-bubble">{m.text}</div>
+                    <div className="hp-bubble">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {m.text}
+                      </ReactMarkdown>
+                    </div>
                   </div>
                 ))}
                 {isLoading && (
