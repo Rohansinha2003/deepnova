@@ -12,10 +12,10 @@ const ContactCTA = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
+
     try {
       if (!import.meta.env.VITE_SUPABASE_URL) {
-         throw new Error("Supabase is not configured yet. Please enter your env variables.");
+        throw new Error("Supabase is not configured yet. Please enter your env variables.");
       }
 
       const { error: submitError } = await supabase
@@ -56,11 +56,11 @@ const ContactCTA = () => {
             <div className="cta-info">
               <div className="info-item">
                 <span className="info-label">Email Us</span>
-                <span className="info-value">hello@deepnova.ai</span>
+                <span className="info-value">ai.deepnova@gmail.com</span>
               </div>
               <div className="info-item">
                 <span className="info-label">Call Us</span>
-                <span className="info-value">+1 (555) 123-4567</span>
+                <span className="info-value">+91 9709569770</span>
               </div>
             </div>
           </div>
@@ -76,40 +76,40 @@ const ContactCTA = () => {
               <form className="contact-form" onSubmit={handleSubmit}>
                 {error && <div style={{ color: '#ff4c4c', marginBottom: '1rem' }}>{error}</div>}
                 <div className="form-group">
-                  <input 
-                    type="text" 
-                    placeholder="Full Name" 
-                    required 
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    required
                     value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   />
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <input 
-                      type="email" 
-                      placeholder="Email Address" 
-                      required 
+                    <input
+                      type="email"
+                      placeholder="Email Address"
+                      required
                       value={formData.email}
-                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     />
                   </div>
                   <div className="form-group">
-                    <input 
-                      type="text" 
-                      placeholder="Company" 
+                    <input
+                      type="text"
+                      placeholder="Company"
                       value={formData.company}
-                      onChange={(e) => setFormData({...formData, company: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                     />
                   </div>
                 </div>
                 <div className="form-group">
-                  <textarea 
-                    placeholder="Tell us about your project or AI needs..." 
-                    rows="4" 
+                  <textarea
+                    placeholder="Tell us about your project or AI needs..."
+                    rows="4"
                     required
                     value={formData.message}
-                    onChange={(e) => setFormData({...formData, message: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   ></textarea>
                 </div>
                 <button type="submit" className="btn btn-primary submit-btn" disabled={loading}>
