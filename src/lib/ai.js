@@ -83,13 +83,16 @@ export async function callAI(modeId, history, signal) {
     ...history,
   ];
 
-  // Use the local Vite proxy (/api/ai) to avoid browser CORS issues.
-  // The proxy in vite.config.js forwards to VITE_AI_API_URL and
-  // injects the Authorization header server-side.
-  const response = await fetch('/api/ai/chat/completions', {
+  // Use the external API URL directly since it supports CORS.
+  // This allows the app to work seamlessly in production (Vercel, Netlify, etc.)
+  // where the Vite local dev server proxy does not exist.
+  const response = await fetch(`${API_URL}/chat/completions`, {
     method: 'POST',
     signal,
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+    },
     body: JSON.stringify({
       model,
       messages,
