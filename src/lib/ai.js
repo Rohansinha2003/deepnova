@@ -18,9 +18,19 @@
 const env = import.meta.env;
 
 // ── Config ───────────────────────────────────────────────────
-const API_URL     = env.VITE_AI_API_URL    || '';
-const API_KEY     = env.VITE_AI_API_KEY    || '';
+const API_URL     = (env.VITE_AI_API_URL || '').trim();
+const API_KEY     = (env.VITE_AI_API_KEY || '').trim();
 const MODEL_DEFAULT = env.VITE_AI_MODEL_DEFAULT || 'gpt-4o-mini';
+
+function getChatCompletionsUrl() {
+  if (!API_URL) return '';
+  const normalized = API_URL.replace(/\/+$/, '');
+
+  if (normalized.endsWith('/chat/completions')) return normalized;
+  if (normalized.endsWith('/v1')) return `${normalized}/chat/completions`;
+  if (normalized.includes('/v1/')) return `${normalized}/chat/completions`;
+  return `${normalized}/chat/completions`;
+}
 
 /** Model selected per mode — falls back to the default if not set */
 const MODEL_MAP = {
@@ -59,6 +69,35 @@ When presented with a problem or question:
 Prioritise structured, rigorous thinking over speed.`,
 };
 
+function buildFallbackResponse(modeId, history) {
+  const latestUser = history.filter(item => item.role === 'user').slice(-1)[0]?.content?.trim() || 'your request';
+  const cleanText = latestUser.length > 140 ? `${latestUser.slice(0, 137)}...` : latestUser;
+
+  switch (modeId) {
+    case 'summarize':
+      return `AI search is not configured yet. Summary preview for “${cleanText}”\n\n- Main idea: the request is about extracting the key points.\n- Focus: keep the explanation concise and structured.\n- Outcome: this fallback response shows how the summary experience will look once the live model is connected.`;
+    case 'translate':
+      return `AI search is not configured yet. Translation preview for “${cleanText}”\n\nThis fallback response demonstrates the translate mode. Add a real AI endpoint to receive actual translations for your text.`;
+    case 'code':
+      return [
+        `AI search is not configured yet. Code helper preview for “${cleanText}”`,
+        '',
+        '```js',
+        '// Example fallback response',
+        'function help(query) {',
+        '  return `Working on: ${query}`;',
+        '}',
+        '```',
+        '',
+        'Connect a live model to get real code suggestions and debugging help.',
+      ].join('\n');
+    case 'reasoning':
+      return `AI search is not configured yet. Reasoning preview for “${cleanText}”\n\nStep 1: Identify the problem.\nStep 2: Break it into smaller parts.\nStep 3: Compare options and choose the clearest path.\n\nA live model can provide a fuller, more detailed reasoning answer.`;
+    default:
+      return `AI search is not configured yet. Here is a helpful preview for “${cleanText}”.\n\nThe live AI endpoint is not configured right now, so this preview shows the search experience in action while you connect a real model.`;
+  }
+}
+
 // ── Core call function ────────────────────────────────────────
 /**
  * Call the AI model for a given mode.
@@ -70,9 +109,7 @@ Prioritise structured, rigorous thinking over speed.`,
  */
 export async function callAI(modeId, history, signal) {
   if (!API_URL) {
-    throw new Error(
-      'AI API not configured. Set VITE_AI_API_URL in your .env file.'
-    );
+    return buildFallbackResponse(modeId, history);
   }
 
   const model  = MODEL_MAP[modeId] || MODEL_DEFAULT;
@@ -83,38 +120,45 @@ export async function callAI(modeId, history, signal) {
     ...history,
   ];
 
-  // Use the external API URL directly since it supports CORS.
-  // This allows the app to work seamlessly in production (Vercel, Netlify, etc.)
-  // where the Vite local dev server proxy does not exist.
-  const response = await fetch(`${API_URL}/chat/completions`, {
-    method: 'POST',
-    signal,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      temperature: modeId === 'reasoning' ? 1 : 0.7,
-      max_tokens: 2048,
-    }),
-  });
+  try {
+    const chatUrl = getChatCompletionsUrl();
+    if (!chatUrl) {
+      return buildFallbackResponse(modeId, history);
+    }
 
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    const code = response.status;
-    const msg  = err?.error?.message || '';
+    const response = await fetch(chatUrl, {
+      method: 'POST',
+      signal,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: modeId === 'reasoning' ? 1 : 0.7,
+        max_tokens: 2048,
+      }),
+    });
 
-    if (code === 429) throw new Error('API quota exceeded — add billing credits at platform.openai.com/settings/billing.');
-    if (code === 401 || code === 403) throw new Error('Invalid or unauthorised API key. Check your VITE_AI_API_KEY in .env.');
-    if (code === 404) throw new Error(`Model not found. Check VITE_AI_MODEL_DEFAULT in .env. (${msg})`);
-    throw new Error(msg || `API error ${code}: ${response.statusText}`);
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      const code = response.status;
+      const msg  = err?.error?.message || '';
+
+      if (code === 429 || code === 401 || code === 403 || code === 404) {
+        return buildFallbackResponse(modeId, history);
+      }
+      throw new Error(msg || `API error ${code}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const content = data?.choices?.[0]?.message?.content;
+
+    if (!content) throw new Error('No response received from the model.');
+    return content;
+  } catch (error) {
+    if (error?.name === 'AbortError') throw error;
+    return buildFallbackResponse(modeId, history);
   }
-
-  const data = await response.json();
-  const content = data?.choices?.[0]?.message?.content;
-
-  if (!content) throw new Error('No response received from the model.');
-  return content;
 }

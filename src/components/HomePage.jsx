@@ -33,6 +33,8 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [history, setHistory]         = useState([]);
   const [isLoading, setIsLoading]     = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [showResults, setShowResults] = useState(false);
   const inputRef                      = useRef(null);
   const heroRef                       = useRef(null);
   const vantaEffectRef                = useRef(null);
@@ -78,6 +80,8 @@ export default function HomePage() {
 
     setSearchQuery('');
     setIsLoading(true);
+    setStatusMessage('');
+    setShowResults(true);
 
     const newHistory = [...history, { role: 'user', content: userText }];
     setHistory(newHistory);
@@ -87,9 +91,15 @@ export default function HomePage() {
     try {
       const reply = await callAI(activeMode.id, newHistory, controller.signal);
       setHistory(prev => [...prev, { role: 'assistant', content: reply }]);
+      if (reply.toLowerCase().includes('ai search is not configured yet')) {
+        setStatusMessage('Live AI response is currently unavailable. The UI is showing a fallback message.');
+      } else {
+        setStatusMessage('');
+      }
     } catch (err) {
       if (err.name === 'AbortError') return;
       console.error(err);
+      setStatusMessage(err.message || 'The search request could not be completed.');
     } finally {
       setIsLoading(false);
     }
@@ -98,6 +108,9 @@ export default function HomePage() {
   const handleKey = e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
+
+  const latestAssistant = [...history].reverse().find(item => item.role === 'assistant');
+  const latestUser = [...history].reverse().find(item => item.role === 'user');
 
   return (
     <>
@@ -162,7 +175,10 @@ export default function HomePage() {
               <div
                 className="hp-search-bar glass"
                 style={{ '--mc': activeMode.color }}
-                onClick={() => inputRef.current?.focus()}
+                onClick={() => {
+                  inputRef.current?.focus();
+                  setShowResults(true);
+                }}
               >
                 <div className="hp-search-pill" style={{ background: activeMode.color + '22', borderColor: activeMode.color + '66', color: activeMode.color }}>
                   {activeMode.icon} {activeMode.label}
@@ -188,6 +204,37 @@ export default function HomePage() {
                   </button>
                 </div>
               </div>
+
+              {statusMessage && (
+                <div className="hp-status-message">
+                  {statusMessage}
+                </div>
+              )}
+
+              {showResults && (
+                <div className="hp-answer-dropdown">
+                  <div className="hp-answer-header">
+                    <span>Answer preview</span>
+                    <button type="button" className="hp-answer-close" onClick={() => setShowResults(false)}>Hide</button>
+                  </div>
+                  <div className="hp-answer-body">
+                    {latestUser && (
+                      <div className="hp-answer-prompt">
+                        <strong>You asked:</strong> {latestUser.content}
+                      </div>
+                    )}
+                    {latestAssistant ? (
+                      <div className="hp-answer-content">
+                        {latestAssistant.content}
+                      </div>
+                    ) : (
+                      <div className="hp-answer-empty">
+                        Your answer will appear here as soon as you send a request.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Suggestions */}
               <div className="hp-suggestions">
