@@ -8,6 +8,9 @@
   transition: all var(--transition-normal);
   display: flex;
   align-items: center;
+  background: linear-gradient(180deg, rgba(13,13,18,0.6), rgba(13,13,18,0.35));
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+  backdrop-filter: blur(6px);
 }
 
 .navbar.scrolled {
