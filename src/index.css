@@ -182,3 +182,54 @@ h1, h2, h3, h4, h5, h6 {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* Tech / Code styles */
+.code-chip {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.03);
+  color: var(--neon-blue);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
+  font-size: 0.875rem;
+  border: 1px solid rgba(0,210,255,0.08);
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace;
+}
+
+/* Responsive helpers */
+:root {
+  --fluid-title: clamp(1.6rem, 3.2vw + 1rem, 4rem);
+  --fluid-subtitle: clamp(1rem, 1.6vw + 0.8rem, 1.5rem);
+}
+
+h1 { font-size: var(--fluid-title); }
+.section-subtitle { font-size: var(--fluid-subtitle); }
+
+/* Reduce padding on smaller screens for denser, more app-like feel */
+@media (max-width: 1024px) {
+  :root { --section-padding: 4.5rem 1.5rem; }
+  .container { padding: 0 1.25rem; }
+}
+
+@media (max-width: 768px) {
+  :root { --section-padding: 3rem 1rem; }
+  .section-title { font-size: 1.8rem; }
+  .btn { padding: 0.6rem 1rem; font-size: 0.95rem; }
+}
+
+/* Card / glass lift utility */
+.card-tech {
+  border-radius: 12px;
+  padding: 1rem;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 6px 30px rgba(0,0,0,0.6);
+}
+
+/* Accessibility: reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+}
