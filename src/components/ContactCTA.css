@@ -1,6 +1,6 @@
 .contact-cta {
   position: relative;
-  background-color: var(--surface-light);
+  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
   overflow: hidden;
 }
 
@@ -27,35 +27,40 @@
   position: relative;
   z-index: 2;
   display: flex;
-  border-radius: 1.5rem;
+  border-radius: 1.75rem;
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 30px 70px -18px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .cta-content {
   flex: 1;
   padding: 4rem;
-  background: var(--surface-color);
+  background: linear-gradient(135deg, #111218 0%, #0d0f14 100%);
   position: relative;
 }
 
 .cta-title {
-  font-size: 2.5rem;
+  font-size: 2.7rem;
   margin-bottom: 1.5rem;
-  line-height: 1.2;
+  line-height: 1.08;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #f8fafc;
 }
 
 .cta-desc {
-  color: var(--text-secondary);
+  color: #d4d4d8;
   font-size: 1.125rem;
   margin-bottom: 3rem;
-  line-height: 1.6;
+  line-height: 1.7;
+  max-width: 620px;
 }
 
 .cta-info {
   display: flex;
   gap: 3rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
   padding-top: 2rem;
 }
 
@@ -65,7 +70,7 @@
 }
 
 .info-label {
-  color: var(--text-secondary);
+  color: #a1a1aa;
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
 }
@@ -73,13 +78,13 @@
 .info-value {
   font-weight: 600;
   font-size: 1.125rem;
-  color: var(--neon-blue);
+  color: #f8fafc;
 }
 
 .cta-form-container {
   flex: 1;
   padding: 4rem;
-  background: rgba(255, 255, 255, 0.02);
+  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
