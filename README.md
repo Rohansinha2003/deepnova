@@ -79,7 +79,7 @@ Then publish the generated build output through your hosting platform of choice.
 
 ## Project Structure
 
-```text
+```
 src/
   components/   # Page sections, navigation, hero, CTA, and shared UI
   data/         # Content data for services and sections
