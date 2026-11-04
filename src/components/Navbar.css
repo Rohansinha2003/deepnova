@@ -73,8 +73,21 @@
 }
 
 
+.nav-links li a.btn-nav,
+.nav-links li a.btn-nav:hover,
+.nav-links li a.btn-nav:focus-visible {
+  color: #050505;
+  font-weight: 700;
+}
+
 .nav-links li a.btn-nav {
-  color: white;
+  padding: 0.55rem 1.3rem;
+  font-size: 0.92rem;
+}
+
+.nav-links li a.btn-nav:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
 }
 
 .mobile-toggle {
