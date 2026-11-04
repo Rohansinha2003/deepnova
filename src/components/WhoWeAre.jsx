@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import Navbar from './Navbar';
-import Hero from './Hero';
+import AboutIntro from './AboutIntro';
 import Services from './Services';
 import Solutions from './Solutions';
 import Process from './Process';
@@ -27,7 +27,7 @@ function WhoWeAre() {
     <>
       <Navbar />
       <main>
-        <Hero />
+        <AboutIntro />
         <Services />
         <Solutions />
         <Process />
