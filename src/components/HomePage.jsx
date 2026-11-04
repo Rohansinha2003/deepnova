@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import NeuralBackground from './NeuralBackground';
 import './HomePage.css';
 
 /* ── Search Modes ─────────────────────────────────────────── */
@@ -38,34 +39,6 @@ export default function HomePage() {
   const [statusMessage, setStatusMessage] = useState('');
   const [showResults, setShowResults] = useState(false);
   const inputRef                      = useRef(null);
-  const heroRef                       = useRef(null);
-  const vantaEffectRef                = useRef(null);
-
-  useEffect(() => {
-    if (!heroRef.current || typeof window === 'undefined' || !window.VANTA?.NET) return;
-
-    const effect = window.VANTA.NET({
-      el: heroRef.current,
-      mouseControls: true,
-      touchControls: true,
-      gyroControls: false,
-      minHeight: 200.00,
-      minWidth: 200.00,
-      scale: 1.00,
-      scaleMobile: 1.00,
-      color: 0xffffff,
-      backgroundColor: 0x050505,
-      points: 12.00,
-      maxDistance: 18.00,
-      spacing: 12.00,
-    });
-
-    vantaEffectRef.current = effect;
-    return () => {
-      vantaEffectRef.current?.destroy?.();
-      vantaEffectRef.current = null;
-    };
-  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -120,27 +93,9 @@ export default function HomePage() {
       <main className="hp-page">
 
         {/* ════ HERO ════════════════════════════════════════ */}
-        <section className="hp-hero" ref={heroRef}>
+        <section className="hp-hero">
           <div className="hp-grid-bg" />
-          <div className="hp-neural-scene" aria-hidden="true">
-            <div className="hp-neural-core" />
-            <div className="hp-neural-ring hp-neural-ring-a" />
-            <div className="hp-neural-ring hp-neural-ring-b" />
-            <div className="hp-neural-orbit hp-neural-orbit-a" />
-            <div className="hp-neural-orbit hp-neural-orbit-b" />
-            {Array.from({ length: 10 }).map((_, index) => {
-              const left = 18 + (index % 5) * 16;
-              const top = 18 + Math.floor(index / 5) * 22;
-              const delay = index * 0.16;
-              return (
-                <span
-                  key={index}
-                  className={`hp-neural-node hp-neural-node-${index % 3}`}
-                  style={{ left: `${left}%`, top: `${top}%`, animationDelay: `${delay}s` }}
-                />
-              );
-            })}
-          </div>
+          <NeuralBackground />
           <div className="hp-orb hp-orb-1" style={{ background: activeMode.color }} />
           <div className="hp-orb hp-orb-2" />
 

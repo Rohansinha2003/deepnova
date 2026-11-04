@@ -728,3 +728,25 @@
   .hp-answer-dropdown { max-height: 55vh; }
   .hp-cta-inner { padding: 2.5rem 1.4rem; }
 }
+
+/* ══ Neural network canvas background ═══════════════════════════ */
+.hp-hero canvas.hp-neural-canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 0 !important;
+  pointer-events: none;
+  opacity: 0.95;
+}
+/* replace the heavy dark overlay with a soft vignette so the network shows through */
+.hp-hero::after {
+  background:
+    radial-gradient(ellipse at center, rgba(2,3,5,0.55) 0%, rgba(2,3,5,0.25) 45%, rgba(2,3,5,0.75) 100%);
+  background-size: auto;
+  opacity: 1;
+  z-index: 0;
+}
+.hp-hero::before { opacity: 0.2; }
+.hp-grid-bg { opacity: 0.45; }
+.hp-hero-inner { z-index: 2; }
