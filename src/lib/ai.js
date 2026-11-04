@@ -146,10 +146,14 @@ export async function callAI(modeId, history, signal) {
       const code = response.status;
       const msg  = err?.error?.message || '';
 
-      if (code === 429 || code === 401 || code === 403 || code === 404) {
-        return buildFallbackResponse(modeId, history);
-      }
-      throw new Error(msg || `API error ${code}: ${response.statusText}`);
+      const hints = {
+        401: 'Invalid or expired API key (check VITE_AI_API_KEY).',
+        403: 'API key not permitted for this model/endpoint.',
+        404: `Endpoint or model not found (check VITE_AI_API_URL and model "${model}").`,
+        429: 'Rate limit or quota exceeded on the AI provider.',
+      };
+      console.error('AI API error', code, err);
+      throw new Error(`AI API ${code}: ${msg || hints[code] || response.statusText}${msg && hints[code] ? ` — ${hints[code]}` : ''}`);
     }
 
     const data = await response.json();
@@ -159,6 +163,9 @@ export async function callAI(modeId, history, signal) {
     return content;
   } catch (error) {
     if (error?.name === 'AbortError') throw error;
-    return buildFallbackResponse(modeId, history);
+    console.error('AI request failed', error);
+    throw error instanceof TypeError
+      ? new Error('Could not reach the AI endpoint (network/CORS error or wrong VITE_AI_API_URL).')
+      : error;
   }
 }
