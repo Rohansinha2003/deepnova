@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { callAI } from '../lib/ai';
 import {
   Send, Sparkles, Zap, Brain,
@@ -225,7 +227,7 @@ export default function HomePage() {
                     )}
                     {latestAssistant ? (
                       <div className="hp-answer-content">
-                        {latestAssistant.content}
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{latestAssistant.content}</ReactMarkdown>
                       </div>
                     ) : (
                       <div className="hp-answer-empty">
