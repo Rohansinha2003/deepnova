@@ -18,14 +18,17 @@
 const env = import.meta.env;
 
 // ── Config ───────────────────────────────────────────────────
-const API_URL     = (env.VITE_AI_API_URL || '').trim();
+// Default: same-origin serverless proxy (api/chat.js) that holds the token server-side.
+// Set VITE_AI_API_URL only to point straight at another endpoint (e.g. local Ollama).
+const API_URL     = (env.VITE_AI_API_URL || '/api/chat').trim();
 const API_KEY     = (env.VITE_AI_API_KEY || '').trim();
-const MODEL_DEFAULT = env.VITE_AI_MODEL_DEFAULT || 'gpt-4o-mini';
+const MODEL_DEFAULT = env.VITE_AI_MODEL_DEFAULT || '2003Rohansinha/Qwen2.5-Coder-1.5B-Python-OCI-LoRA';
 
 function getChatCompletionsUrl() {
   if (!API_URL) return '';
   const normalized = API_URL.replace(/\/+$/, '');
 
+  if (normalized === '/api/chat') return normalized;
   if (normalized.endsWith('/chat/completions')) return normalized;
   if (normalized.endsWith('/v1')) return `${normalized}/chat/completions`;
   if (normalized.includes('/v1/')) return `${normalized}/chat/completions`;
@@ -149,6 +152,8 @@ export async function callAI(modeId, history, signal) {
       const hints = {
         401: 'Invalid or expired API key (check VITE_AI_API_KEY).',
         403: 'API key not permitted for this model/endpoint.',
+        402: 'Billing/credits problem on the model host.',
+        503: 'Model server is not configured or is starting up (AI_API_URL / AI_API_KEY on Vercel).',
         404: `Endpoint or model not found (check VITE_AI_API_URL and model "${model}").`,
         429: 'Rate limit or quota exceeded on the AI provider.',
       };
